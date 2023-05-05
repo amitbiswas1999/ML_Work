@@ -15,10 +15,10 @@ class Program
     static async Task Main(string[] args)
     {
         // Set up the HttpClient with the OpenAI API endpoint and your API key
-        var token="Bearer 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";
+        var token="Bearer ";
         HttpClient httpClient = new HttpClient();
         httpClient.BaseAddress = new Uri("https://api.openai.com/");
-        httpClient.DefaultRequestHeaders.Add("Authorization", "Bearer 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");
+        httpClient.DefaultRequestHeaders.Add("Authorization", "Bearer ");
 
         // Set up the request body as a JSON string
         string requestBody = @"{
