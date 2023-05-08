@@ -140,7 +140,7 @@ internal class Program
     {
         HttpClient httpClient = new HttpClient();
         httpClient.BaseAddress = new Uri("https://api.openai.com/");
-        httpClient.DefaultRequestHeaders.Add("Authorization", "Bearer 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");
+        httpClient.DefaultRequestHeaders.Add("Authorization", "Bearer ");
 
         // Set up the request body as a JSON string
         string requestBody = @"{
