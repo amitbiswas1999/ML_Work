@@ -13,6 +13,11 @@ using System.Threading.Tasks;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System.Text;
+using System;
+using System.Collections.Generic;
+using System.Net.Http;
+using System.Threading.Tasks;
+using Polly;
 
 
 internal class Program
@@ -22,12 +27,13 @@ internal class Program
     {
         string url="https://www.cloudcraftz.com/";
         int level=3;
+        bool Flags=true;
 
         List<string> web_url = new List<string>();
         web_url.Add(url);
 
 
-        var all_links=FilteredLink(web_url,level);
+        var all_links=FilteredLink(web_url,level,Flags);
 
         Console.WriteLine("Number of links to Scrapes "+ all_links.Count);
         Console.WriteLine(String.Join(Environment.NewLine, all_links));
@@ -38,7 +44,7 @@ internal class Program
        
     }
 
-    static List<String>FilteredLink (List<string>web_url,int level)
+    static List<String>FilteredLink (List<string>web_url,int level,bool Flags)
     {
         List<string>local_url=new List<string>();
         local_url.AddRange(web_url);
@@ -47,7 +53,7 @@ internal class Program
             foreach (var items in local_url.ToList())
             {
                 var docs= GetDocument(items);
-                var new_links=ExtractLinks(docs);
+                var new_links=ExtractLinks(docs,Flags);
                 foreach (var links in new_links)
                 {
                     if(!web_url.Contains(links))
@@ -66,10 +72,13 @@ internal class Program
     static HtmlDocument GetDocument(string url)
     {
         HtmlWeb web = new HtmlWeb();
+        
         HtmlDocument doc = web.Load(url);
      
         return doc;
     }
+    
+   
 
     static string Gettext(HtmlDocument doc)
     {
@@ -80,7 +89,7 @@ internal class Program
         return cleanedtext ;
     }
     
-    static List<string> ExtractLinks(HtmlDocument doc)
+    static List<string> ExtractLinks(HtmlDocument doc,bool Flags)
     {
         List<string> hrefTags = new List<string>();
         foreach (HtmlNode link in doc.DocumentNode.SelectNodes("//a[@href]"))
@@ -92,9 +101,21 @@ internal class Program
             }         
         }
 
-        List<string> filteredList = hrefTags.Where(s => s.Contains("www.cloudcraftz")).ToList();
 
-        return filteredList;    
+        List<string> httpLinks = hrefTags.Where(link => link.StartsWith("http")).ToList();
+
+        if (Flags==true){
+            List<string> filteredList = httpLinks.Where(s => s.Contains("www.cloudcraftz")).ToList();
+            return filteredList; 
+
+        }
+
+        // List<string> filteredList = hrefTags.Where(s => s.Contains("www.cloudcraftz")).ToList();
+
+
+        else{
+            return httpLinks;
+        }  
     }
 
     static async Task Linktotext(List<String>links)
@@ -108,7 +129,7 @@ internal class Program
             JToken embeddings = await texttoemb(str);
             JArray embeddingsArray = new JArray(embeddings);
             embeddingVector.Add(embeddingsArray);
-            Console.Write("embedding generated\n");
+            // Console.Write("embedding generated\n");
 
             string[] substrings = items.Split('/');
             string elem=substrings [substrings.Length-2];
@@ -148,7 +169,7 @@ internal class Program
     {
         HttpClient httpClient = new HttpClient();
         httpClient.BaseAddress = new Uri("https://api.openai.com/");
-        httpClient.DefaultRequestHeaders.Add("Authorization", "Bearer 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");
+        httpClient.DefaultRequestHeaders.Add("Authorization", "Bearer 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");
 
         // Set up the request body as a JSON string
         string requestBody = @"{
